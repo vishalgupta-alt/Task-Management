@@ -3,6 +3,7 @@ package com.antino.taskmanagement.Controller;
 import com.antino.taskmanagement.Entity.RefreshToken;
 import com.antino.taskmanagement.Entity.User;
 import com.antino.taskmanagement.Repository.RefreshTokenRepository;
+import com.antino.taskmanagement.Repository.UserRepository;
 import com.antino.taskmanagement.Security.JwtUtil;
 import com.antino.taskmanagement.Service.UserService;
 import jakarta.transaction.Transactional;
@@ -24,9 +25,12 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/register")
     public User register(@RequestBody User user){
+        System.out.println("Password received: " + user.getPassword());
         return userService.register(user);
     }
 
@@ -37,11 +41,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public User getProfile(@RequestHeader("Authorization") String authHeader){
-
         if(authHeader == null || !authHeader.startsWith("Bearer ")){
             throw new RuntimeException("Unauthorized");
         }
-
         String token = authHeader.replace("Bearer ", "");
         return userService.getCurrentUser(token);
     }
@@ -52,6 +54,11 @@ public class AuthController {
         if(authHeader == null || !authHeader.startsWith("Bearer ")){
             throw new RuntimeException("Unauthorized");
         }
+
+        String token=authHeader.substring(7);
+        String email=jwtUtil.getEmailFromToken(token);
+
+        refreshRepo.deleteByEmail(email);
 
         return "Logout successful";
     }
