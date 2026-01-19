@@ -44,5 +44,22 @@ public class JwtUtil {
             return false;
         }
     }
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) // 7 days
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateAccessToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
 }
 
